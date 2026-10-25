@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>热量计算｜食刻搜</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a href="/static/index.html">搜索</a>
+      <a href="/static/topics.html">特色专区</a>
+      <a href="/static/kitchen.html">灶边好物</a>
+      <a href="/static/assistant.html">小灶灵</a>
+    </div>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <main class="container page-narrow">
+    <header class="assistant-header">
+      <h1>热量计算</h1>
+      <p>添加食材与克重，估算总热量及占每日 2000 大卡比例</p>
+    </header>
+
+    <div class="calorie-form">
+      <div id="rows"></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="btnAdd" type="button">＋ 添加食材</button>
+        <button class="btn btn-primary" id="btnCalc" type="button">开始计算</button>
+      </div>
+    </div>
+
+    <div class="calorie-result" id="result">
+      <h2 class="section-title">计算结果</h2>
+      <table class="cal-table">
+        <thead>
+          <tr>
+            <th>食材</th>
+            <th>重量(g)</th>
+            <th>热量(大卡)</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+      <div class="cal-summary">
+        <div class="cal-stat">
+          <div class="num" id="totalCal">0</div>
+          <div class="lbl">合计总热量（大卡）</div>
+        </div>
+        <div class="cal-stat">
+          <div class="num" id="percent">0%</div>
+          <div class="lbl">占每日 2000 大卡</div>
+        </div>
+        <div class="cal-stat">
+          <div class="num">2000</div>
+          <div class="lbl">成人每日参考</div>
+        </div>
+      </div>
+      <p class="note" id="calNote">计算值仅供参考。</p>
+    </div>
+  </main>
+
+  <footer class="footer">食刻搜 · 热量数据为演示估算</footer>
+  <script src="/static/js/calorie.js?v=4"></script>
+</body>
+</html>

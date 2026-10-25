@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <title>特色专区｜食刻搜</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a href="/static/index.html">搜索</a>
+      <a class="active" href="/static/topics.html">特色专区</a>
+      <a href="/static/kitchen.html">灶边好物</a>
+      <a href="/static/assistant.html">小灶灵</a>
+    </div>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <main class="container">
+    <header class="assistant-header">
+      <h1>特色专区</h1>
+      <p>养生、女性健康等垂直场景，点开查看专区食谱</p>
+    </header>
+    <div class="zone-grid" id="zones">
+      <div class="empty-tip">加载中…</div>
+    </div>
+  </main>
+
+  <footer class="footer">食刻搜 · 想吃立刻搜到</footer>
+  <script src="/static/js/img.js?v=4"></script>
+  <script>
+    async function loadZones() {
+      const root = document.getElementById("zones");
+      try {
+        const res = await fetch("/api/category/list");
+        const json = await res.json();
+        const list = json.data || [];
+        if (!list.length) {
+          root.innerHTML = '<div class="empty-tip">暂无专区</div>';
+          return;
+        }
+        root.innerHTML = list.map((z, i) => `
+          <article class="zone-card">
+            <div class="zone-head" style="background:${z.color || "#f0853a"}" data-idx="${i}">
+              <div>
+                <h2>${z.name}</h2>
+                <p>${z.desc || ""} · ${z.count} 道菜</p>
+              </div>
+              <span>▼</span>
+            </div>
+            <div class="zone-body" id="zone-body-${i}">
+              <div class="zone-mini-grid">
+                ${(z.recipes || []).map(r => `
+                  <a class="card" href="/static/detail.html?id=${r.id}">
+                    <div class="pic">
+                      ${r["图片"]
+                        ? window.SkiImg.tag(r["图片"], r["菜名"] || "")
+                        : '<div class="pic-ph"></div>'}
+                    </div>
+                    <div class="body">
+                      <div class="nm">${r["菜名"] || ""}</div>
+                      <div class="meta">
+                        <span>${r["耗时"] || "—"}</span>
+                        <span>${r["热量"] || "—"}</span>
+                      </div>
+                    </div>
+                  </a>
+                `).join("")}
+              </div>
+            </div>
+          </article>
+        `).join("");
+
+        root.querySelectorAll(".zone-head").forEach(head => {
+          head.addEventListener("click", () => {
+            const idx = head.dataset.idx;
+            const body = document.getElementById("zone-body-" + idx);
+            body.classList.toggle("open");
+            head.querySelector("span").textContent = body.classList.contains("open") ? "▲" : "▼";
+          });
+        });
+
+        const first = document.getElementById("zone-body-0");
+        if (first) {
+          first.classList.add("open");
+          const h = root.querySelector(".zone-head");
+          if (h) h.querySelector("span").textContent = "▲";
+        }
+      } catch (e) {
+        root.innerHTML = '<div class="empty-tip">加载失败，请确认后端已启动</div>';
+      }
+    }
+    loadZones();
+  </script>
+</body>
+</html>

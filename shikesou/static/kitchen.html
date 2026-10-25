@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>灶边好物｜食刻搜</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a href="/static/index.html">搜索</a>
+      <a href="/static/topics.html">特色专区</a>
+      <a class="active" href="/static/kitchen.html">灶边好物</a>
+      <a href="/static/assistant.html">小灶灵</a>
+    </div>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <header class="site-header site-header-compact">
+    <h1>灶边好物</h1>
+  </header>
+
+  <div class="bar">
+    <input type="search" id="keyword" placeholder="搜厨具名称、品类或店铺" autocomplete="off" />
+    <button class="btn btn-primary" id="btnSearch" type="button">搜索</button>
+    <span class="hint" id="hint"></span>
+  </div>
+  <div class="cat-filter" id="cats"></div>
+
+  <main class="page">
+    <div class="grid" id="grid"><div class="empty">加载中…</div></div>
+  </main>
+
+  <footer class="footer">食刻搜 · 数据来自当当厨具</footer>
+  <script src="/static/js/img.js?v=4"></script>
+  <script>
+    (function () {
+      var keywordInput = document.getElementById("keyword");
+      var hint = document.getElementById("hint");
+      var grid = document.getElementById("grid");
+      var cats = document.getElementById("cats");
+      var currentCat = "";
+
+      function esc(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      async function load(q, category) {
+        hint.textContent = "加载中…";
+        try {
+          var url =
+            "/api/kitchenware/list?limit=120&q=" +
+            encodeURIComponent(q || "") +
+            "&category=" +
+            encodeURIComponent(category || "");
+          var res = await fetch(url);
+          var json = await res.json();
+          var list = json.data || [];
+          hint.textContent = list.length + " 件";
+
+          if (!cats.dataset.ready && json.categories) {
+            cats.innerHTML =
+              '<button class="tag on" type="button" data-cat="">全部</button>' +
+              json.categories
+                .map(function (c) {
+                  return (
+                    '<button class="tag" type="button" data-cat="' +
+                    esc(c) +
+                    '">' +
+                    esc(c) +
+                    "</button>"
+                  );
+                })
+                .join("");
+            cats.dataset.ready = "1";
+            cats.querySelectorAll(".tag").forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                cats.querySelectorAll(".tag").forEach(function (t) {
+                  t.classList.remove("on");
+                });
+                btn.classList.add("on");
+                currentCat = btn.dataset.cat || "";
+                load(keywordInput.value.trim(), currentCat);
+              });
+            });
+          }
+
+          if (!list.length) {
+            grid.innerHTML = '<div class="empty">暂无厨具</div>';
+            return;
+          }
+          grid.innerHTML = list
+            .map(function (item) {
+              var img = item["图片"] || "";
+              var name = esc(item["名称"] || "");
+              var link = item["链接"] || item["商品链接"] || "#";
+              return (
+                '<a class="card" href="' +
+                esc(link) +
+                '" target="_blank" rel="noopener">' +
+                '<div class="pic">' +
+                (img
+                  ? window.SkiImg.tag(img, item["名称"] || "")
+                  : '<div class="pic-ph"></div>') +
+                "</div>" +
+                '<div class="body">' +
+                '<div class="nm">' +
+                name +
+                "</div>" +
+                '<div class="meta">' +
+                (item["价格"] || item["价格(元)"]
+                  ? '<span class="price">¥' +
+                    esc(item["价格"] || item["价格(元)"]) +
+                    "</span>"
+                  : "") +
+                (item["品类"]
+                  ? '<span class="tag">' + esc(item["品类"]) + "</span>"
+                  : "") +
+                "</div></div></a>"
+              );
+            })
+            .join("");
+        } catch (e) {
+          hint.textContent = "加载失败";
+          grid.innerHTML = '<div class="empty">加载失败，请确认后端已启动</div>';
+        }
+      }
+
+      document.getElementById("btnSearch").addEventListener("click", function () {
+        load(keywordInput.value.trim(), currentCat);
+      });
+      keywordInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") load(keywordInput.value.trim(), currentCat);
+      });
+
+      load("", "");
+    })();
+  </script>
+</body>
+</html>

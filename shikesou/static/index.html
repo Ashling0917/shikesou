@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>食刻搜｜专业食谱搜索引擎</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a class="active" href="/static/index.html">搜索</a>
+      <a href="/static/topics.html">特色专区</a>
+      <a href="/static/kitchen.html">灶边好物</a>
+      <a href="/static/assistant.html">小灶灵</a>
+    </div>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <header class="site-header site-header-compact">
+    <h1>食刻搜 · <span>今天吃什么</span></h1>
+  </header>
+
+  <div class="bar">
+    <input type="search" id="keyword" placeholder="搜菜名或分类，例如 红烧肉 / 汤羹" autocomplete="off" />
+    <button class="btn btn-primary" id="btnSearch" type="button">搜索</button>
+    <span class="hint" id="hint"></span>
+  </div>
+
+  <div class="quick-tags">
+    <span class="label">大家都在搜：</span>
+    <button class="tag" type="button" data-kw="红烧肉">红烧肉</button>
+    <button class="tag" type="button" data-kw="汤羹">汤羹</button>
+    <button class="tag" type="button" data-kw="烘焙">烘焙</button>
+    <button class="tag" type="button" data-kw="家常菜">家常菜</button>
+    <button class="tag" type="button" data-kw="凉菜">凉菜</button>
+  </div>
+
+  <main class="page">
+    <section id="resultsSection" style="display:none;">
+      <h2 class="section-title">搜索结果 <span id="resultHint"></span></h2>
+      <div class="grid" id="results"></div>
+    </section>
+
+    <section class="hot-section">
+      <div class="hot-inner">
+        <h2 class="section-title">近期热搜排行 <span>按收藏数</span></h2>
+        <div class="grid grid-hot" id="hotList">
+          <div class="empty">加载中…</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">食刻搜 · 数据来自美食天下菜谱与当当厨具</footer>
+  <script src="/static/js/img.js?v=4"></script>
+  <script src="/static/js/search.js?v=4"></script>
+</body>
+</html>

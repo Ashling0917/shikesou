@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>食谱详情｜食刻搜</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav" data-back="1">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a href="/static/index.html">搜索</a>
+      <a href="/static/topics.html">特色专区</a>
+      <a href="/static/kitchen.html">灶边好物</a>
+      <a href="/static/assistant.html">小灶灵</a>
+    </div>
+    <a class="nav-back btn btn-ghost" href="/static/index.html">← 返回搜索</a>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <main class="container" id="detailRoot">
+    <div class="empty-tip">加载中…</div>
+  </main>
+
+  <footer class="footer">食刻搜 · 想吃立刻搜到</footer>
+  <script src="/static/js/img.js?v=4"></script>
+  <script src="/static/js/calorie.js?v=4"></script>
+  <script>
+    function getId() {
+      const p = new URLSearchParams(location.search);
+      return p.get("id");
+    }
+
+    function esc(str) {
+      return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /** 食材等字段：按 | 分隔 */
+    function splitPipe(str) {
+      if (!str) return [];
+      return String(str).split(/[|｜]/).map(s => s.trim()).filter(Boolean);
+    }
+
+    /** 做法步骤：数据多为换行分隔，兼容 | */
+    function splitSteps(str) {
+      if (!str) return [];
+      var s = String(str).replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+      if (!s) return [];
+      if (s.indexOf("\n") !== -1) {
+        return s.split("\n").map(function (t) { return t.trim(); }).filter(Boolean);
+      }
+      return splitPipe(s);
+    }
+
+    function renderKitchenAd(ad) {
+      if (!ad || !ad["名称"]) return "";
+      var img = ad["图片"] || "";
+      var name = ad["名称"] || "";
+      var link = ad["链接"] || "/static/kitchen.html";
+      var price = ad["价格"] ? "¥" + ad["价格"] : "";
+      var brand = ad["品牌"] || "";
+      var cat = ad["品类"] || "";
+      var meta = [brand, cat, price].filter(Boolean).join(" · ");
+      var imgHtml = img
+        ? window.SkiImg.tag(img, name)
+        : '<div class="pic-ph" style="width:84px;height:84px;flex-shrink:0"></div>';
+      var openAttr = link.indexOf("http") === 0
+        ? ' target="_blank" rel="noopener"'
+        : "";
+      return (
+        '<section class="panel">' +
+        "<h2>推荐厨具</h2>" +
+        '<div class="ad">' +
+        imgHtml +
+        "<div>" +
+        '<div class="t">灶边好物 · 按本菜工艺/分类推荐</div>' +
+        '<div class="n">' + esc(name) + "</div>" +
+        (meta ? '<div class="t">' + esc(meta) + "</div>" : "") +
+        '<a href="' + esc(link) + '"' + openAttr + ">查看商品 →</a>" +
+        "</div></div></section>"
+      );
+    }
+
+    function seedFromIngredients(ingredients) {
+      return ingredients
+        .map(function (t) {
+          return window.CalorieCalc.parseIngredientText(t);
+        })
+        .filter(Boolean);
+    }
+
+    async function loadDetail() {
+      const id = getId();
+      const root = document.getElementById("detailRoot");
+      if (!id) {
+        root.innerHTML = '<div class="empty-tip">缺少食谱 ID</div>';
+        return;
+      }
+      try {
+        const res = await fetch("/api/recipe/" + id);
+        const json = await res.json();
+        if (json.code !== 0 || !json.data) {
+          root.innerHTML = '<div class="empty-tip">食谱不存在</div>';
+          return;
+        }
+        const r = json.data;
+        const ingredients = splitPipe(r["主辅料"]);
+        const steps = splitSteps(r["做法步骤"]);
+        const calorieSeed = seedFromIngredients(ingredients);
+        const img = r["图片"] || "";
+        const name = r["菜名"] || "未命名菜谱";
+        const photo = img
+          ? `<div class="detail-photo">${window.SkiImg.tag(img, name)}</div>`
+          : "";
+        const tipText = (r["小窍门"] || "").trim();
+        const tipSection = tipText
+          ? `<section class="panel">
+            <h2>小窍门</h2>
+            <div class="tip-box">${esc(tipText)}</div>
+          </section>`
+          : "";
+
+        root.innerHTML = `
+          <article class="detail-card">
+            ${photo}
+            <div class="detail-info">
+              <h1>${esc(name)}</h1>
+              <div class="detail-tags">
+                <span class="meta-chip">⏱ ${esc(r["耗时"] || "-")}</span>
+                <span class="meta-chip">🔥 ${esc(r["热量"] || "-")}</span>
+                <span class="meta-chip">口味 ${esc(r["口味"] || "-")}</span>
+                <span class="meta-chip">工艺 ${esc(r["工艺"] || "-")}</span>
+                ${r["难度"] ? `<span class="meta-chip">难度 ${esc(r["难度"])}</span>` : ""}
+              </div>
+            </div>
+          </article>
+
+          <section class="panel">
+            <h2>食材清单</h2>
+            <ul class="ingredient-list">
+              ${ingredients.map(i => `<li><span>${esc(i)}</span></li>`).join("") || "<li>暂无</li>"}
+            </ul>
+          </section>
+
+          <section class="panel" id="calorieSection">
+            <h2>热量计算</h2>
+            <p class="calorie-hint">已根据本菜食材预填，可改克重后计算（占每日 2000 大卡比例）</p>
+            <div class="calorie-form">
+              <div id="rows"></div>
+              <div class="form-actions">
+                <button class="btn btn-ghost" id="btnAdd" type="button">＋ 添加食材</button>
+                <button class="btn btn-primary" id="btnCalc" type="button">开始计算</button>
+              </div>
+            </div>
+            <div class="calorie-result" id="result">
+              <h3 class="section-title">计算结果</h3>
+              <table class="cal-table">
+                <thead>
+                  <tr>
+                    <th>食材</th>
+                    <th>重量(g)</th>
+                    <th>热量(大卡)</th>
+                  </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+              </table>
+              <div class="cal-summary">
+                <div class="cal-stat">
+                  <div class="num" id="totalCal">0</div>
+                  <div class="lbl">合计总热量（大卡）</div>
+                </div>
+                <div class="cal-stat">
+                  <div class="num" id="percent">0%</div>
+                  <div class="lbl">占每日 2000 大卡</div>
+                </div>
+                <div class="cal-stat">
+                  <div class="num">2000</div>
+                  <div class="lbl">成人每日参考</div>
+                </div>
+              </div>
+              <p class="note" id="calNote">计算值仅供参考。</p>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>制作步骤</h2>
+            <ol class="step-list">
+              ${steps.map((s, idx) => {
+                const text = s.replace(/^\d+[.、．]\s*/, "");
+                return `<li><span class="step-num">${idx + 1}</span><span>${esc(text)}</span></li>`;
+              }).join("") || "<li>暂无步骤</li>"}
+            </ol>
+          </section>
+
+          ${renderKitchenAd(r["推荐厨具"])}
+          ${tipSection}
+        `;
+        document.title = name + "｜食刻搜";
+
+        window.CalorieCalc.init({
+          seed: calorieSeed.length
+            ? calorieSeed
+            : [
+                { name: "鸡蛋", grams: 150 },
+                { name: "西红柿", grams: 200 },
+              ],
+        });
+      } catch (e) {
+        root.innerHTML = '<div class="empty-tip">加载失败，请确认后端已启动</div>';
+      }
+    }
+
+    loadDetail();
+  </script>
+</body>
+</html>

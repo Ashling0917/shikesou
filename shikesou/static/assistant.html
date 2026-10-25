@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title>小灶灵·AI厨房助手｜食刻搜</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=8" />
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav" id="siteNav">
+    <a class="nav-brand" href="/static/index.html">食刻搜</a>
+    <div class="nav-tabs">
+      <a href="/static/index.html">搜索</a>
+      <a href="/static/topics.html">特色专区</a>
+      <a href="/static/kitchen.html">灶边好物</a>
+      <a class="active" href="/static/assistant.html">小灶灵</a>
+    </div>
+  </nav>
+  <script src="/static/js/nav.js?v=9"></script>
+
+  <main class="container page-narrow">
+    <header class="assistant-header">
+      <h1>小灶灵 · AI 厨房助手</h1>
+      <p>找菜、估用量、查热量 —— 答案来自食刻搜菜谱库</p>
+    </header>
+
+    <div class="chat-wrap">
+      <div class="chat-messages" id="messages">
+        <div class="bubble bot">你好，我是小灶灵～可以问「有鸡蛋可以做什么」「西红柿炒鸡蛋的热量」，想改克重细算再点进菜品详情页～</div>
+      </div>
+      <div class="chat-quick">
+        <button class="tag" data-q="有鸡蛋可以做什么？">有鸡蛋可以做什么？</button>
+        <button class="tag" data-q="西红柿炒鸡蛋的热量？">西红柿炒鸡蛋的热量？</button>
+        <button class="tag" data-q="西红柿炒鸡蛋两个人要几个鸡蛋？">西红柿炒鸡蛋两个人要几个鸡蛋？</button>
+        <button class="tag" data-q="没有料酒可以用什么代替？">没有料酒可以用什么代替？</button>
+      </div>
+      <div class="chat-input-bar">
+        <input id="chatInput" type="text" placeholder="例如：有鸡蛋可以做什么…" autocomplete="off" />
+        <button class="btn btn-primary" id="btnSend">发送</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">基于 webdata 菜谱检索 · 份量无官方几人份时为估算</footer>
+  <script src="/static/js/assistant.js?v=4"></script>
+</body>
+</html>
